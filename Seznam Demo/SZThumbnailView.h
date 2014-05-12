@@ -28,8 +28,8 @@
 @property	(strong, nonatomic)						UILabel						*imageNameTF;
 @property	(strong, nonatomic)						UILabel						*imageSizeTF;
 
-@property	(assign, nonatomic, readonly)			UIImage						*thumbnailImage;
-@property	(strong, nonatomic, readonly)			UIImage						*image;
+@property	(strong, nonatomic)						UIImage						*thumbnailImage;
+@property	(strong, nonatomic)						UIImage						*image;
 
 @property	(strong, nonatomic)						UIView						*lineView;
 

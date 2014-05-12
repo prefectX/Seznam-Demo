@@ -38,8 +38,36 @@
 	_thumbnailViews = [[ NSMutableArray alloc ] init ];
 	_imageView = [[ SZImageView alloc ] initWithViewController:self ];
 
-	SZConnector *connector = [ SZConnector downloadDataFromImageIndex:1 count:THUMBNAIL_COUNT searchText:_searchBar.text viewController:self ];
-	[ _connectors addObject:connector ];
+	[ SZConnector downloadDataFromImageIndex:1 count:THUMBNAIL_COUNT searchText:_searchBar.text viewController:self ];
+}
+
+//----------------------------------------------------------------------------------------------------
+- (void) viewWillAppear:(BOOL)animated
+//----------------------------------------------------------------------------------------------------
+{
+	[ super viewWillAppear:animated ];
+
+	if( UIInterfaceOrientationIsLandscape(self.interfaceOrientation) )
+	{
+		if( _thumbnailViews.count > 0 )
+			_imageView.thumbnailView = _thumbnailViews.firstObject;
+		else
+			[ NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateLandscapeImageTimer:) userInfo:nil repeats:YES ];
+		
+		[ _imageView setVisible:YES animated:NO ];
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+- (void) updateLandscapeImageTimer:(NSTimer *)timer
+//----------------------------------------------------------------------------------------------------
+{
+	NSLog(@"Timer");
+	if( _thumbnailViews.count > 0 )
+	{
+		_imageView.thumbnailView = _thumbnailViews.firstObject;
+		[ timer invalidate ];
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -50,6 +78,64 @@
 }
 
 
+//----------------------------------------------------------------------------------------------------
+- (UIStatusBarStyle)preferredStatusBarStyle
+//----------------------------------------------------------------------------------------------------
+{
+	if( _imageView.visible == YES )
+		return UIStatusBarStyleLightContent;
+	
+	return UIStatusBarStyleDefault;
+}
+
+
+
+
+
+#pragma mark - Connectors
+//****************************************************************************************************
+//*** Connectors
+//****************************************************************************************************
+//----------------------------------------------------------------------------------------------------
+- (void) addConnector:(SZConnector *)connector
+//----------------------------------------------------------------------------------------------------
+{
+	[ _connectors addObject:connector ];
+
+	if( _connectors.count > 0 )
+		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES ];
+}
+
+//----------------------------------------------------------------------------------------------------
+- (void) removeConnector:(SZConnector *)connector
+//----------------------------------------------------------------------------------------------------
+{
+	[ _connectors removeObject:connector ];
+
+	if( _connectors.count == 0 )
+		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO ];
+}
+
+//----------------------------------------------------------------------------------------------------
+- (SZConnector *) connectorForImageIndex:(NSInteger)imageIndex
+//----------------------------------------------------------------------------------------------------
+{
+	SZConnector *connector = nil;
+	
+	for(SZConnector *con in _connectors)
+	{
+		if( con.connectorType != 0 )
+			continue;
+		
+		if( con.imageIndex >= imageIndex && imageIndex < con.imageIndex + con.count )
+		{
+			connector = con;
+			break;
+		}
+	}
+	
+	return connector;
+}
 
 
 
@@ -83,7 +169,7 @@
 
 	if( [ self thumbnailWithImageIndex:thumbnailView.imageIndex ])
 	{
-//		NSLog(@"ERROR Thumbnail: %d", (int)thumbnailView.imageIndex);
+		NSLog(@"ERROR Thumbnail: %d", (int)thumbnailView.imageIndex);
 		return;
 	}
 	
@@ -154,7 +240,11 @@
 		
 		for( int i = 0; i < thumbsCount; i += 1)
 		{
-			[ self removeThumbnailAtTop ];
+			SZThumbnailView *thumbnailView = [ _thumbnailViews firstObject ];
+			
+			[ thumbnailView removeFromSuperview ];
+			[ _thumbnailViews removeObjectAtIndex:0 ];
+
 			currentThumbnailIndex -= 1;
 			
 			scrollPoint.y -= 260;
@@ -166,12 +256,16 @@
 	}
 	
 	//--- Remove Thumbnail from End ---
-	if( currentThumbnailIndex + (currentThumbnailIndex - currentThumbnailIndex % THUMBNAIL_MIN) + THUMBNAIL_COUNT < _thumbnailViews.count )
+	if( currentThumbnailIndex + (THUMBNAIL_MIN - currentThumbnailIndex % THUMBNAIL_MIN) + THUMBNAIL_COUNT < _thumbnailViews.count )
 	{
-		NSInteger thubsCount = _thumbnailViews.count + (currentThumbnailIndex - currentThumbnailIndex % THUMBNAIL_MIN) - THUMBNAIL_COUNT - THUMBNAIL_MIN;
+		NSInteger thubsCount = _thumbnailViews.count - (currentThumbnailIndex + (THUMBNAIL_MIN - currentThumbnailIndex % THUMBNAIL_MIN) + THUMBNAIL_COUNT);// - THUMBNAIL_COUNT;// - THUMBNAIL_MIN;
 		for( int i = 0; i < thubsCount; i += 1)
 		{
-			[ self removeThumbnailAtEnd ];
+			SZThumbnailView *thumbnailView = [ _thumbnailViews lastObject ];
+			
+			[ thumbnailView removeFromSuperview ];
+			[ _thumbnailViews removeLastObject ];
+
 			update = YES;
 		}
 	}
@@ -196,46 +290,6 @@
 		
 	}
 }
-
-
-//----------------------------------------------------------------------------------------------------
-- (void) removeThumbnailAtTop
-//----------------------------------------------------------------------------------------------------
-{
-	SZThumbnailView *thumbnailView = [ _thumbnailViews firstObject ];
-
-	[ thumbnailView removeFromSuperview ];
-	[ _thumbnailViews removeObjectAtIndex:0 ];
-}
-
-//----------------------------------------------------------------------------------------------------
-- (void) removeThumbnailAtEnd
-//----------------------------------------------------------------------------------------------------
-{
-	SZThumbnailView *thumbnailView = [ _thumbnailViews lastObject ];
-	
-	[ thumbnailView removeFromSuperview ];
-	[ _thumbnailViews removeLastObject ];
-}
-#pragma mark -
-
-//----------------------------------------------------------------------------------------------------
-- (IBAction) thumbnailViewTapped:(id)sender
-//----------------------------------------------------------------------------------------------------
-{
-	SZThumbnailView *thumbnailView = (SZThumbnailView *)sender;
-	if( thumbnailView.image )
-	{
-		_imageView.thumbnailView = thumbnailView;
-		_imageView.visible = YES;
-	}
-	else
-	{
-		UIAlertView *alert = [[ UIAlertView alloc ] initWithTitle:@"Error" message:@"No image found" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
-		[ alert show];
-	}
-}
-
 
 
 
@@ -276,23 +330,26 @@
 			imagesCount = THUMBNAIL_MIN;
 		}
 		
-		
-		SZConnector *connector = [ SZConnector downloadDataFromImageIndex:fromIndex count:imagesCount searchText:_searchBar.text viewController:self ];
-		[ _connectors addObject:connector ];
+		if([ self connectorForImageIndex:fromIndex ] == nil)
+			[ SZConnector downloadDataFromImageIndex:fromIndex count:imagesCount searchText:_searchBar.text viewController:self ];
+		else
+			NSLog(@"Connector exists: %d", (int)fromIndex );
 	}
 	
 	//--- Add Thumbnail to Bottom ---
 	else if( currentThumbnailIndex + THUMBNAIL_COUNT > _thumbnailViews.count )
 	{
-		SZConnector *connector = [ SZConnector downloadDataFromImageIndex:lastThumbnailView.imageIndex+1 count:THUMBNAIL_MIN searchText:_searchBar.text viewController:self ];
-		[ _connectors addObject:connector ];
+		if([ self connectorForImageIndex:lastThumbnailView.imageIndex+1 ] == nil)
+			[ SZConnector downloadDataFromImageIndex:lastThumbnailView.imageIndex+1 count:THUMBNAIL_MIN searchText:_searchBar.text viewController:self ];
+		else
+			NSLog(@"Connector exists: %d", (int)lastThumbnailView.imageIndex+1 );
 	}
 
 	_prevScrolledImageIndex = currentThumbnailView.imageIndex;
 }
 
 //----------------------------------------------------------------------------------------------------
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+- (void) scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 //----------------------------------------------------------------------------------------------------
 {
 	if( decelerate == NO )
@@ -309,6 +366,7 @@
 
 
 
+
 #pragma mark - Interface orientation
 //****************************************************************************************************
 //*** Interface orientation
@@ -317,29 +375,22 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 //----------------------------------------------------------------------------------------------------
 {
-	CGRect frame = CGRectMake(0, 0, 0, 0);
-	
 	if (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft || toInterfaceOrientation == UIInterfaceOrientationLandscapeRight)
 	{
-		frame.size.width = self.view.frame.size.height;
-		frame.size.height = self.view.frame.size.width;
-		
-		self.imageView.doneButtonVisible = NO;
+		NSInteger currentThumbnailIndex = ( _imageView.visible ) ? [ _thumbnailViews indexOfObject:_imageView.thumbnailView ] : _scrollView.contentOffset.y / 260.0;
+
+		_fromLandscape = ( _imageView.visible ) ? NO : YES;
+
+		_imageView.thumbnailView = [ _thumbnailViews objectAtIndex:currentThumbnailIndex ];
+		_imageView.visible = YES;
 	}
-	
+
 	else
 	{
-		frame.size.width = self.view.frame.size.width;
-		frame.size.height = self.view.frame.size.height;
-
-		self.imageView.doneButtonVisible = YES;
+		_imageView.visible = ( _fromLandscape ) ? NO : YES;
 	}
-
-	self.imageView.frame = frame;
-	self.imageView.imageView.frame = frame;
-	self.imageView.scrollView.zoomScale = 1.0;
-	self.imageView.scrollView.contentSize = frame.size;
 }
+
 
 
 
@@ -379,8 +430,8 @@
 	
 	[ _thumbnailViews removeAllObjects ];
 	
-	SZConnector *connector = [ SZConnector downloadDataFromImageIndex:1 count:THUMBNAIL_COUNT searchText:searchBar.text viewController:self ];
-	[ _connectors addObject:connector ];
+	[ SZConnector downloadDataFromImageIndex:1 count:THUMBNAIL_COUNT searchText:searchBar.text viewController:self ];
+//	[ _connectors addObject:connector ];
 }
 @end
 

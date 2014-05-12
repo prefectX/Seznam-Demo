@@ -9,11 +9,14 @@
 #import <UIKit/UIKit.h>
 #import "SZThumbnailView.h"
 #import "SZImageView.h"
+#import "SZConnector.h"
 
 @interface SZViewController : UIViewController <UIScrollViewDelegate, UISearchBarDelegate>
 {
-	NSInteger _prevScrolledImageIndex;
+	NSInteger	_prevScrolledImageIndex;
+	BOOL		_prevImageViewVisible;
 	
+	BOOL		_fromLandscape;
 }
 
 @property	(weak, nonatomic)				IBOutlet		UISearchBar				*searchBar;
@@ -22,14 +25,17 @@
 @property	(strong, nonatomic, readonly)					NSMutableArray			*thumbnailViews;
 @property	(strong, nonatomic, readonly)					SZImageView				*imageView;
 
+//@property	(weak, nonatomic)								SZThumbnailView			*selectedThumbnailView;
+
 @property	(strong, nonatomic)								NSMutableArray			*connectors;
 
 
-- (SZThumbnailView *) thumbnailWithImageIndex:(NSInteger)index;
+- (void) addConnector:(SZConnector *)connector;
+- (void) removeConnector:(SZConnector *)connector;
+- (SZConnector *) connectorForImageIndex:(NSInteger)imageIndex;
 
+- (SZThumbnailView *) thumbnailWithImageIndex:(NSInteger)index;
 - (void) addThumbnailView:(SZThumbnailView *)thumbnailView;
 - (void) removeThumbnailViews;
-
-- (IBAction) thumbnailViewTapped:(id)sender;
 
 @end

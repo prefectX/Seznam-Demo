@@ -35,4 +35,6 @@
 
 - (id)initWithViewController:(SZViewController *)viewController;
 
+- (void) setVisible:(BOOL)visible animated:(BOOL)animated;
+
 @end

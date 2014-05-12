@@ -17,11 +17,15 @@
 @interface SZConnector : NSObject
 
 @property	(weak, nonatomic)						SZViewController	*viewController;
-@property	(strong, nonatomic)						NSURLConnection		*connection;
-@property	(strong, nonatomic)						NSMutableData		*responseData;
+
+@property	(assign, nonatomic, readonly)			int					connectorType;
 @property	(assign, nonatomic)						NSInteger			imageIndex;
 @property	(assign, nonatomic)						NSInteger			count;
 
+@property	(strong, nonatomic)						NSURLConnection		*connection;
+@property	(strong, nonatomic)						NSMutableData		*responseData;
+
 + (SZConnector *) downloadDataFromImageIndex:(NSInteger)imageIndex count:(NSInteger)count searchText:(NSString *)searchText viewController:(SZViewController *)viewController;
++ (SZConnector *) downloadImageWithImageIndex:(NSInteger)imageIndex URL:(NSURL *)imageURL connectorType:(int)connectorType viewController:(SZViewController *)viewController;
 
 @end

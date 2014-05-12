@@ -25,13 +25,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Seznam Demo/SZConnector.m"
-            timestampString = "421157198.874438"
+            filePath = "Seznam Demo/SZViewController.m"
+            timestampString = "421598230.507113"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "146"
-            endingLineNumber = "146"
-            landmarkName = "-connectionDidFinishLoading:"
+            startingLineNumber = "103"
+            endingLineNumber = "103"
+            landmarkName = "-addConnector:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Seznam Demo/SZViewController.m"
+            timestampString = "421598230.507113"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "433"
+            endingLineNumber = "433"
+            landmarkName = "-searchBarSearchButtonClicked:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -41,13 +57,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Seznam Demo/SZConnector.m"
-            timestampString = "421157198.874438"
+            filePath = "Seznam Demo/SZViewController.m"
+            timestampString = "421598230.507113"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "74"
-            endingLineNumber = "74"
-            landmarkName = "-downloadDataFromImageIndex:count:searchText:viewController:"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
+            landmarkName = "-removeThumbnailViews"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Seznam Demo/SZViewController.m"
+            timestampString = "421598230.507113"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "384"
+            endingLineNumber = "384"
+            landmarkName = "-willAnimateRotationToInterfaceOrientation:duration:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -58,12 +90,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Seznam Demo/SZImageView.m"
-            timestampString = "421100701.814471"
+            timestampString = "421598253.915993"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "120"
-            endingLineNumber = "120"
-            landmarkName = "-setVisible:"
+            startingLineNumber = "138"
+            endingLineNumber = "138"
+            landmarkName = "-setVisible:animated:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

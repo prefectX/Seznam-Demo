@@ -36,8 +36,6 @@
 	_imageThumbnailView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	_imageThumbnailView.userInteractionEnabled = NO;
 	_imageThumbnailView.contentMode = UIViewContentModeScaleAspectFit;
-	_imageThumbnailView.backgroundColor = [ UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0 ];
-//	_imageThumbnailView.hidden = YES;
 	[ self addSubview:_imageThumbnailView ];
 
 	viewFrame = CGRectMake(20, 237, 200, 15);
@@ -82,30 +80,17 @@
 {
 	_thumbnailURL = thumbnailURL;
 	
-	dispatch_queue_t backgroundQueue = dispatch_queue_create("cz.seznam",NULL);
-	dispatch_async(backgroundQueue, ^(void) {
+	[ SZConnector downloadImageWithImageIndex:_imageIndex URL:thumbnailURL connectorType:1 viewController:_viewController ];
+}
 
-		NSURLRequest *req = [ NSURLRequest requestWithURL:thumbnailURL ];
-		NSURLResponse *res = nil;
-		NSError *error = nil;
-		
-		NSData *data = [ NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&error ];
-		if( data )
-		{
-			UIImage *thumbnailImage = [ UIImage imageWithData:data ];
-			if( thumbnailImage )
-			{
-				dispatch_async(dispatch_get_main_queue(), ^{
-					self.imageThumbnailView.image = thumbnailImage;
-//					_imageThumbnailView.hidden = NO;
-					[ _activityView stopAnimating ];
-				});
-			}
-			
-			dispatch_async(dispatch_get_main_queue(), ^{
-			});
-		}
-	});
+//----------------------------------------------------------------------------------------------------
+- (void) setThumbnailImage:(UIImage *)thumbnailImage
+//----------------------------------------------------------------------------------------------------
+{
+	_thumbnailImage = thumbnailImage;
+	_imageThumbnailView.image = thumbnailImage;
+	
+	[ _activityView stopAnimating ];
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -113,29 +98,8 @@
 //----------------------------------------------------------------------------------------------------
 {
 	_imageURL = imageURL;
-	
-	dispatch_queue_t backgroundQueue = dispatch_queue_create("cz.seznam",NULL);
-	dispatch_async(backgroundQueue, ^(void) {
-		
-		NSURLResponse *response = nil;
-		NSError *error = nil;
-		
-		NSData *data = [ NSURLConnection sendSynchronousRequest:[ NSURLRequest requestWithURL:_imageURL ] returningResponse:&response error:&error ];
-		if( error )
-		{
-			NSLog(@"Image Download Error: %@", error.description);
-			return;
-		}
-		
-		if( data )
-		{
-			_image = [ UIImage imageWithData:data ];
-			if( !_image )
-			{
-				NSLog(@"Image Data Error: %d -> %@", (int)_imageIndex, _imageURL);
-			}
-		}
-	});
+
+	[ SZConnector downloadImageWithImageIndex:_imageIndex URL:imageURL connectorType:2 viewController:_viewController ];
 }
 
 
@@ -143,7 +107,18 @@
 - (void) thumbnailViewTapped:(UITapGestureRecognizer *)gestureRecognizer
 //----------------------------------------------------------------------------------------------------
 {
-	[ self.viewController thumbnailViewTapped:self ];
+	NSLog(@"Tapped: %d: %@", (int)self.imageIndex, self.imageURL );
+	
+	if( self.image )
+	{
+		_viewController.imageView.thumbnailView = self;
+		_viewController.imageView.visible = YES;
+	}
+	else
+	{
+		UIAlertView *alert = [[ UIAlertView alloc ] initWithTitle:@"Error" message:@"No image found" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
+		[ alert show];
+	}
 }
 
 @end
